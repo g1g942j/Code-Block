@@ -1,3 +1,16 @@
 <resources>
-    <string name="app_name">code-block</string>
+    <string name="app_name">Code Block</string>
+
+    <string name="clear_screen">Очистить код</string>
+    <string name="run_code">Запустить код</string>
+    <string name="block_message">Доступные блоки</string>
+
+    <string name="variable">int</string>
+    <string name="cycle">for</string>
+    <string name="condition">if</string>
+    <string name="function">func</string>
+    <string name="variable_text">int x = 0;</string>
+    <string name="cycle_text">for (int i in 0 to 10)</string>
+    <string name="condition_text">if (condition)</string>
+    <string name="function_text">func newFunc() {</string>
 </resources>
