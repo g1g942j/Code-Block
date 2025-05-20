@@ -1,16 +1,33 @@
 <resources>
-    <string name="app_name">Code Block</string>
+    <string name="app_name">Code Blocks</string>
+    <string name="menu">Menu</string>
+    <string name="run">Run</string>
+    <string name="clear">Clear</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="save">Save</string>
 
-    <string name="clear_screen">Очистить код</string>
-    <string name="run_code">Запустить код</string>
-    <string name="block_message">Доступные блоки</string>
-
-    <string name="variable">int</string>
-    <string name="cycle">for</string>
-    <string name="condition">if</string>
-    <string name="function">func</string>
+    <string name="variable">Variable</string>
     <string name="variable_text">int x = 0;</string>
-    <string name="cycle_text">for (int i in 0 to 10)</string>
-    <string name="condition_text">if (condition)</string>
-    <string name="function_text">func newFunc() {</string>
+    <string name="array">Array</string>
+    <string name="array_text">int[] arr = {1,2,3};</string>
+    <string name="loop">For Loop</string>
+    <string name="for_loop_text">for (int i=0; i &lt; 10; i++) {</string>
+    <string name="condition">If Condition</string>
+    <string name="if_text">if (condition) {</string>
+    <string name="close">Close Block</string>
+    <string name="close_block">}</string>
+
+    <string name="bubble_sort">Bubble Sort</string>
+    <string name="bubble_sort_array">int[] arr = {5,3,1,4,2};</string>
+    <string name="bubble_sort_loop1">for (int i=0; i &lt; arr.length-1; i++) {</string>
+    <string name="bubble_sort_loop2">for (int j=0; j &lt; arr.length-i-1; j++) {</string>
+    <string name="bubble_sort_if">if (arr[j] > arr[j+1]) {</string>
+    <string name="bubble_sort_temp">int temp = arr[j];</string>
+    <string name="bubble_sort_swap1">arr[j] = arr[j+1];</string>
+    <string name="bubble_sort_swap2">arr[j+1] = temp;</string>
+    <string name="bubble_sort_close">}</string>
+
+    <string name="output_title">Execution Result</string>
+    <string name="close_output">Close</string>
 </resources>
