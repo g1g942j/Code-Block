@@ -32,10 +32,41 @@ fun calculateNestingLevels(blocks: List<String>): List<Int> {
     }
 }
 
+fun validateCodeStructure(blocks: List<String>): List<Int> {
+    val errorIndices = mutableListOf<Int>()
+    var braceBalance = 0
+
+    blocks.forEachIndexed { index, block ->
+        val trimmed = block.trim()
+        when {
+            trimmed.endsWith("{") -> braceBalance++
+            trimmed == "}" -> {
+                braceBalance--
+                if (braceBalance < 0) errorIndices.add(index)
+            }
+            trimmed.startsWith("}") -> errorIndices.add(index)
+        }
+    }
+
+    if (braceBalance > 0) {
+        blocks.forEachIndexed { index, block ->
+            if (block.trim().endsWith("{")) errorIndices.add(index)
+        }
+    }
+
+    return errorIndices.distinct()
+}
+
 fun interpretCode(blocks: List<String>): String {
     val output = StringBuilder()
+    val errors = mutableListOf<String>()
     val variables = mutableMapOf<String, Any>()
     val declaredVariables = mutableSetOf<String>()
+
+    val structureErrors = validateCodeStructure(blocks)
+    if (structureErrors.isNotEmpty()) {
+        errors.add("Структурные ошибки в блоках: ${structureErrors.joinToString { (it+1).toString() }}")
+    }
 
     fun precedence(op: Char): Int = when (op) {
         '+', '-' -> 1
@@ -440,7 +471,9 @@ fun interpretCode(blocks: List<String>): String {
             blockCounter++
         }
     }
-
+    if (errors.isNotEmpty()) {
+        output.insert(0, "--- ОШИБКИ ---\n${errors.joinToString("\n")}\n\n")
+    }
     output.append("\n---ИТОГОВЫЕ ЗНАЧЕНИЯ---\n")
     declaredVariables.sorted().forEach { name ->
         when (val value = variables[name]) {

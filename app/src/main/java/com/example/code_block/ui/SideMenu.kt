@@ -14,78 +14,46 @@ fun SideMenu(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val blockTemplates = listOf(
+        R.string.variable_text to R.string.variable,
+        R.string.array_text to R.string.array,
+        R.string.for_loop_text to R.string.loop,
+        R.string.if_text to R.string.condition,
+        R.string.close_block to R.string.close
+    )
 
     Column(
-        modifier = modifier
-            .width(200.dp)
-            .padding(8.dp)
+        modifier = modifier.width(240.dp).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = context.getString(R.string.variable),
-            style = MaterialTheme.typography.labelLarge,
-            modifier = Modifier.padding(vertical = 8.dp)
+            "Добавить блок",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        listOf(
-            R.string.variable_declaration_text to R.string.variable_declaration,
-            R.string.variable_assignment_text to R.string.variable_assignment,
-        ).forEach { (textRes, labelRes) ->
-            Button(
-                onClick = {
-                    onBlockAdded(context.getString(textRes))
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)
+        blockTemplates.forEach { (textRes, labelRes) ->
+            FilledTonalButton(
+                onClick = { onBlockAdded(context.getString(textRes)) },
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text(context.getString(labelRes))
             }
         }
 
-        Text(
-            text = context.getString(R.string.array),
-            style = MaterialTheme.typography.labelLarge,
-            modifier = Modifier.padding(vertical = 8.dp)
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = 12.dp),
+            thickness = 1.dp,
+            color = MaterialTheme.colorScheme.outlineVariant
         )
-        Button(
-            onClick = {
-                onBlockAdded(context.getString(R.string.array_text))
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp)
-        ) {
-            Text(context.getString(R.string.array))
-        }
 
         Text(
-            text = "Control Structures",
-            style = MaterialTheme.typography.labelLarge,
-            modifier = Modifier.padding(vertical = 8.dp)
+            "Примеры алгоритмов",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
         )
-        listOf(
-            R.string.for_loop_text to R.string.loop,
-            R.string.if_text to R.string.condition,
-            R.string.close_block to R.string.close
-        ).forEach { (textRes, labelRes) ->
-            Button(
-                onClick = {
-                    onBlockAdded(context.getString(textRes))
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)
-            ) {
-                Text(context.getString(labelRes))
-            }
-        }
 
-        Text(
-            text = "Examples",
-            style = MaterialTheme.typography.labelLarge,
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
-        Button(
+        FilledTonalButton(
             onClick = {
                 listOf(
                     R.string.bubble_sort_array,
@@ -102,9 +70,7 @@ fun SideMenu(
                     onBlockAdded(context.getString(resId))
                 }
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp)
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text(context.getString(R.string.bubble_sort))
         }
