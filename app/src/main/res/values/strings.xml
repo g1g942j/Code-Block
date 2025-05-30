@@ -57,4 +57,7 @@
     <string name="if_else_else">else {</string>
     <string name="if_else_else_body">z = 1;</string>
     <string name="if_else_close">}</string>
+
+    <string name="move_up">Move Up</string>
+    <string name="move_down">Move Down</string>
 </resources>

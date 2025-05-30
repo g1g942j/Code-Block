@@ -1,14 +1,15 @@
 package com.example.code_block.ui
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -24,6 +25,7 @@ fun MainScreen() {
     var editMode by remember { mutableStateOf(false) }
 
     val nestingLevels = remember(blocks) { calculateNestingLevels(blocks) }
+    val errorIndices = remember(blocks) { validateCodeStructure(blocks) }
 
     Scaffold(
         topBar = {
@@ -31,7 +33,10 @@ fun MainScreen() {
                 title = { Text(stringResource(R.string.app_name)) },
                 navigationIcon = {
                     IconButton(onClick = { showMenu = !showMenu }) {
-                        Icon(Icons.Default.Menu, stringResource(R.string.menu))
+                        Icon(
+                            Icons.Default.Menu,
+                            contentDescription = stringResource(R.string.menu)
+                        )
                     }
                 },
                 actions = {
@@ -47,8 +52,14 @@ fun MainScreen() {
 
                     Button(
                         onClick = {
-                            outputText = interpretCode(blocks)
-                            showOutput = true
+                            if (errorIndices.isEmpty()) {
+                                outputText = interpretCode(blocks)
+                                showOutput = true
+                            } else {
+                                outputText = "Исправьте ошибки перед выполнением:\n" +
+                                        errorIndices.joinToString { "#${it + 1}" }
+                                showOutput = true
+                            }
                         },
                         enabled = blocks.isNotEmpty()
                     ) {
@@ -79,6 +90,7 @@ fun MainScreen() {
                     }
                 },
                 onClear = { blocks = emptyList() },
+                errorIndices = errorIndices,
                 editMode = editMode
             )
 
