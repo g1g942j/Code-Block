@@ -57,6 +57,16 @@ fun MainScreen() {
                 onBlockRemoved = { i ->
                     blocks = blocks.toMutableList().apply { removeAt(i) }
                 },
+                onBlockMoved = { from, to ->
+                    blocks = blocks.toMutableList().apply {
+                        if (from < to) {
+                            add(to, removeAt(from))
+                        } else {
+                            val item = removeAt(from)
+                            add(to, item)
+                        }
+                    }
+                },
                 onClear = { blocks = emptyList() }
             )
 
