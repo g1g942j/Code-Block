@@ -19,6 +19,8 @@ private val DarkColorPalette = darkColorScheme(
     onSurface = Color(0xFFE0E0E0)
 )
 
+val SplashBackground = DarkColorPalette.background
+
 @Composable
 fun CodeBlockTheme(content: @Composable () -> Unit) {
     MaterialTheme(
