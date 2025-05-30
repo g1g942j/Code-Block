@@ -108,5 +108,40 @@ fun SideMenu(
         ) {
             Text(context.getString(R.string.bubble_sort))
         }
+        Button(
+            onClick = {
+                listOf(
+                    R.string.if_checker_var_declaration,
+                    R.string.if_checker_assignment,
+                    R.string.if_checker_if,
+                    R.string.if_checker_if_body,
+                    R.string.if_checker_close
+                ).forEach { resId ->
+                    onBlockAdded(context.getString(resId))
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+        ) {
+            Text("If Checker")
+        }
+        Button(
+            onClick = {
+                listOf(
+                    R.string.for_checker_var_declaration,
+                    R.string.for_checker_loop,
+                    R.string.for_checker_loop_body,
+                    R.string.for_checker_close
+                ).forEach { resId ->
+                    onBlockAdded(context.getString(resId))
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+        ) {
+            Text("For Checker")
+        }
     }
 }

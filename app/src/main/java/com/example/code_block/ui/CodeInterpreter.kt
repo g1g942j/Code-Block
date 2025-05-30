@@ -189,7 +189,7 @@ fun interpretCode(blocks: List<String>): String {
                 }
             }
 
-            trimmed.contains("=") && !trimmed.startsWith("int") -> {
+            trimmed.contains("=") && !trimmed.startsWith("int") && !trimmed.startsWith("if") && !trimmed.startsWith("for") -> {
                 val left = trimmed.substringBefore("=").trim()
                 val right = trimmed.substringAfter("=").substringBefore(";").trim()
 
@@ -257,37 +257,61 @@ fun interpretCode(blocks: List<String>): String {
     var currentNesting = 0
     var blockCounter = 0
 
+    fun shouldExecute(): Boolean {
+        if (conditionStack.isEmpty()) return true
+        var deepestActive = -1
+        conditionStack.forEach {
+            if (it.conditionMet && it.nestingLevel > deepestActive) {
+                deepestActive = it.nestingLevel
+            }
+        }
+        return deepestActive >= currentNesting
+    }
+
     while (blockCounter < blocks.size) {
         val block = blocks[blockCounter]
         val trimmed = block.trim()
-        try {
-            val shouldExecute = conditionStack.isEmpty() ||
-                    conditionStack.any { it.conditionMet && it.nestingLevel >= currentNesting }
 
+        try {
             when {
                 trimmed.startsWith("for") -> {
                     val parts = trimmed.substringAfter("for (").substringBefore(")").split(";")
                     if (parts.size == 3) {
                         val init = parts[0].trim()
-                        val condition = parts[1].trim()
-
                         if (init.startsWith("int ")) {
                             val name = init.substringAfter("int ").substringBefore("=").trim()
                             val expr = init.substringAfter("=").trim()
                             val value = evaluateRPN(toRPN(expr))
                             variables[name] = value
+                            declaredVariables.add(name)
                         }
-                        val conditionParts = condition.split("<=", "<", ">=", ">")
+
+                        val condition = parts[1].trim()
+                        val conditionParts = condition.split("<=", "<", ">=", ">", "!=", "==")
                         if (conditionParts.size == 2) {
                             val varName = conditionParts[0].trim()
                             val endExpr = conditionParts[1].trim()
                             val end = evaluateRPN(toRPN(endExpr))
+
+                            var step = 1
+                            val stepPart = parts[2].trim()
+                            if (stepPart.contains("+=")) {
+                                step = stepPart.substringAfter("+=").trim().toIntOrNull() ?: 1
+                            } else if (stepPart.contains("-=")) {
+                                step = -1 * (stepPart.substringAfter("-=").trim().toIntOrNull() ?: 1)
+                            } else if (stepPart.contains("++")) {
+                                step = 1
+                            } else if (stepPart.contains("--")) {
+                                step = -1
+                            }
+
+                            val currentValue = variables[varName] as? Int ?: 0
                             loopStack.add(
                                 LoopState(
                                     varName,
-                                    variables[varName] as Int,
+                                    currentValue,
                                     end,
-                                    1,
+                                    step,
                                     blockCounter,
                                     currentNesting + 1
                                 )
@@ -301,46 +325,109 @@ fun interpretCode(blocks: List<String>): String {
                 trimmed == "}" -> {
                     if (loopStack.isNotEmpty() && loopStack.last().nestingLevel == currentNesting) {
                         val loop = loopStack.last()
-                        loop.current++
+                        loop.current += loop.step
                         variables[loop.varName] = loop.current
-                        if (loop.current < loop.end) {
+
+                        val shouldContinue = when {
+                            loop.step > 0 -> loop.current < loop.end
+                            loop.step < 0 -> loop.current > loop.end
+                            else -> false
+                        }
+
+                        if (shouldContinue) {
                             blockCounter = loop.startblockCounter + 1
                             continue
                         } else {
                             loopStack.removeAt(loopStack.lastIndex)
                         }
                     }
+
                     if (conditionStack.isNotEmpty() && conditionStack.last().nestingLevel == currentNesting) {
                         conditionStack.removeAt(conditionStack.lastIndex)
                     }
+
                     currentNesting = maxOf(0, currentNesting - 1)
                     blockCounter++
                 }
 
                 trimmed.startsWith("if") -> {
                     val condition = trimmed.substringAfter("if").substringBefore("{").trim()
-                    val conditionMet = evaluateCondition(condition.removeSurrounding("()"))
+                    val conditionMet = evaluateCondition(condition.removeSurrounding("(", ")"))
                     conditionStack.add(ConditionState(conditionMet, currentNesting + 1))
                     currentNesting++
                     blockCounter++
                 }
 
                 else -> {
-                    if (shouldExecute) {
+                    if (shouldExecute()) {
                         when {
-                            trimmed.contains("=") -> {
+                            trimmed.startsWith("int[]") -> {
+                                val name = trimmed.substringAfter("int[]").substringBefore("=").trim()
+                                declaredVariables.add(name)
+                                try {
+                                    val values = trimmed.substringAfter("{")
+                                        .substringBefore("}")
+                                        .split(",")
+                                        .map { it.trim().toInt() }
+                                        .toIntArray()
+                                    variables[name] = values
+                                } catch (e: Exception) {
+                                    variables[name] = intArrayOf()
+                                }
+                            }
+
+                            trimmed.startsWith("int") && !trimmed.contains("=") -> {
+                                val names = trimmed.substringAfter("int")
+                                    .substringBefore(";")
+                                    .split(",")
+                                    .map { it.trim() }
+                                    .filter { it.isNotEmpty() }
+
+                                names.forEach { name ->
+                                    variables[name] = 0
+                                    declaredVariables.add(name)
+                                }
+                            }
+
+                            trimmed.contains("=") && !trimmed.startsWith("int") -> {
                                 val left = trimmed.substringBefore("=").trim()
                                 val right = trimmed.substringAfter("=").substringBefore(";").trim()
 
                                 if (left.contains("[")) {
                                     val arrName = left.substringBefore("[").trim()
-                                    val indexExpr =
-                                        left.substringAfter("[").substringBefore("]").trim()
+                                    val indexExpr = left.substringAfter("[").substringBefore("]").trim()
                                     val index = evaluateRPN(toRPN(indexExpr))
                                     val value = evaluateRPN(toRPN(right))
                                     (variables[arrName] as? IntArray)?.set(index, value)
                                 } else {
-                                    variables[left] = evaluateRPN(toRPN(right))
+                                    val value = evaluateRPN(toRPN(right))
+                                    variables[left] = value
+                                    if (left !in declaredVariables) {
+                                        declaredVariables.add(left)
+                                    }
+                                }
+                            }
+
+                            trimmed.startsWith("int") && trimmed.contains("=") -> {
+                                val declarations = trimmed.substringAfter("int")
+                                    .substringBefore(";")
+                                    .split(",")
+                                    .map { it.trim() }
+                                    .filter { it.isNotEmpty() }
+
+                                declarations.forEach { declaration ->
+                                    if (declaration.contains("=")) {
+                                        val name = declaration.substringBefore("=").trim()
+                                        val expr = declaration.substringAfter("=").trim()
+                                        try {
+                                            val value = evaluateRPN(toRPN(expr))
+                                            variables[name] = value
+                                            declaredVariables.add(name)
+                                        } catch (e: Exception) {
+                                            variables[name] = 0
+                                            declaredVariables.add(name)
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -353,6 +440,7 @@ fun interpretCode(blocks: List<String>): String {
             blockCounter++
         }
     }
+
     output.append("\n---ИТОГОВЫЕ ЗНАЧЕНИЯ---\n")
     declaredVariables.sorted().forEach { name ->
         when (val value = variables[name]) {

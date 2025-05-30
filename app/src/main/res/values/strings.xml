@@ -35,4 +35,17 @@
 
     <string name="output_title">Execution Result</string>
     <string name="close_output">Close</string>
+
+    <string name="if_checker_var_declaration">int x, y;</string>
+    <string name="if_checker_assignment">x = 10;</string>
+    <string name="if_checker_if">if (x == 10) {</string>
+    <string name="if_checker_if_body">y = 1;</string>
+    <string name="if_checker_close">}</string>
+    <string name="if_checker">If Checker</string>
+
+    <string name="for_checker_var_declaration">int sum = 0;</string>
+    <string name="for_checker_loop">for (int i = 0; i &lt; 5; i++) {</string>
+    <string name="for_checker_loop_body">sum = sum + i;</string>
+    <string name="for_checker_close">}</string>
+    <string name="for_checker">For Checker</string>
 </resources>
