@@ -66,6 +66,7 @@ fun SideMenu(
         listOf(
             R.string.for_loop_text to R.string.loop,
             R.string.if_text to R.string.condition,
+            R.string.else_text to R.string.else_block,
             R.string.close_block to R.string.close
         ).forEach { (textRes, labelRes) ->
             Button(
@@ -145,6 +146,27 @@ fun SideMenu(
                 .padding(vertical = 4.dp)
         ) {
             Text("For Checker")
+        }
+        Button(
+            onClick = {
+                listOf(
+                    R.string.if_else_var_declaration,
+                    R.string.if_else_assignment,
+                    R.string.if_else_if,
+                    R.string.if_else_if_body,
+                    R.string.if_else_close,
+                    R.string.if_else_else,
+                    R.string.if_else_else_body,
+                    R.string.if_else_close
+                ).forEach { resId ->
+                    onBlockAdded(context.getString(resId))
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+        ) {
+            Text(context.getString(R.string.if_else_checker))
         }
     }
 }

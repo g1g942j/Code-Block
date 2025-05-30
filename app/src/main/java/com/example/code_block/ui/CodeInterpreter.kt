@@ -9,8 +9,6 @@ data class LoopState(
     val nestingLevel: Int
 )
 
-data class ConditionState(val conditionMet: Boolean, val nestingLevel: Int)
-
 fun calculateNestingLevels(blocks: List<String>): List<Int> {
     var level = 0
     return blocks.map { block ->
@@ -21,12 +19,10 @@ fun calculateNestingLevels(blocks: List<String>): List<Int> {
                 level++
                 currentLevel
             }
-
             trimmed == "}" -> {
                 level = maxOf(0, level - 1)
                 level
             }
-
             else -> level
         }
     }
@@ -65,7 +61,7 @@ fun interpretCode(blocks: List<String>): String {
 
     val structureErrors = validateCodeStructure(blocks)
     if (structureErrors.isNotEmpty()) {
-        errors.add("Структурные ошибки в блоках: ${structureErrors.joinToString { (it+1).toString() }}")
+        errors.add("Структурные ошибки в блоках: ${structureErrors.joinToString { (it + 1).toString() }}")
     }
 
     fun precedence(op: Char): Int = when (op) {
@@ -89,7 +85,6 @@ fun interpretCode(blocks: List<String>): String {
                     }
                     outPut.add(num.toString())
                 }
-
                 expression[i].isLetter() -> {
                     val varName = StringBuilder()
                     while (i < expression.length && (expression[i].isLetterOrDigit() || expression[i] == '_')) {
@@ -97,11 +92,9 @@ fun interpretCode(blocks: List<String>): String {
                     }
                     outPut.add(varName.toString())
                 }
-
                 expression[i] == '(' -> {
                     operators.add(expression[i++])
                 }
-
                 expression[i] == ')' -> {
                     while (operators.isNotEmpty() && operators.last() != '(') {
                         outPut.add(operators.last().toString())
@@ -112,12 +105,8 @@ fun interpretCode(blocks: List<String>): String {
                     }
                     i++
                 }
-
                 else -> {
-                    while (operators.isNotEmpty() && precedence(operators.last()) >= precedence(
-                            expression[i]
-                        )
-                    ) {
+                    while (operators.isNotEmpty() && precedence(operators.last()) >= precedence(expression[i])) {
                         outPut.add(operators.last().toString())
                         operators.removeAt(operators.lastIndex)
                     }
@@ -157,7 +146,6 @@ fun interpretCode(blocks: List<String>): String {
                         }
                     )
                 }
-
                 else -> stack.add(0)
             }
         }
@@ -167,13 +155,10 @@ fun interpretCode(blocks: List<String>): String {
     fun evaluateCondition(condition: String): Boolean {
         val ops = listOf("==", "!=", ">=", "<=", ">", "<")
         val op = ops.firstOrNull { condition.contains(it) } ?: return false
-
         val parts = condition.split(op)
         if (parts.size != 2) return false
-
         val left = evaluateRPN(toRPN(parts[0].trim()))
         val right = evaluateRPN(toRPN(parts[1].trim()))
-
         return when (op) {
             "==" -> left == right
             "!=" -> left != right
@@ -205,25 +190,21 @@ fun interpretCode(blocks: List<String>): String {
                     output.append("Ошибка инициализации массива $name: ${e.message}\n")
                 }
             }
-
             trimmed.startsWith("int") && !trimmed.contains("=") -> {
                 val names = trimmed.substringAfter("int")
                     .substringBefore(";")
                     .split(",")
                     .map { it.trim() }
                     .filter { it.isNotEmpty() }
-
                 names.forEach { name ->
                     variables[name] = 0
                     declaredVariables.add(name)
                     output.append("Переменная $name = 0\n")
                 }
             }
-
             trimmed.contains("=") && !trimmed.startsWith("int") && !trimmed.startsWith("if") && !trimmed.startsWith("for") -> {
                 val left = trimmed.substringBefore("=").trim()
                 val right = trimmed.substringAfter("=").substringBefore(";").trim()
-
                 if (left.contains("[")) {
                     val arrName = left.substringBefore("[").trim()
                     val indexExpr = left.substringAfter("[").substringBefore("]").trim()
@@ -231,34 +212,18 @@ fun interpretCode(blocks: List<String>): String {
                     val value = evaluateRPN(toRPN(right))
                     (variables[arrName] as? IntArray)?.set(index, value)
                 } else {
-                    if (left.contains(",")) {
-                        val vars = left.split(",").map { it.trim() }
-                        val value = evaluateRPN(toRPN(right))
-                        vars.forEach { name ->
-                            variables[name] = value
-                            if (name !in declaredVariables) {
-                                declaredVariables.add(name)
-                            }
-                            output.append("Переменная $name = $value\n")
-                        }
-                    } else {
-                        val value = evaluateRPN(toRPN(right))
-                        variables[left] = value
-                        if (left !in declaredVariables) {
-                            declaredVariables.add(left)
-                        }
-                        output.append("Переменная $left = $value\n")
-                    }
+                    val value = evaluateRPN(toRPN(right))
+                    variables[left] = value
+                    if (left !in declaredVariables) declaredVariables.add(left)
+                    output.append("Переменная $left = $value\n")
                 }
             }
-
             trimmed.startsWith("int") && trimmed.contains("=") -> {
                 val declarations = trimmed.substringAfter("int")
                     .substringBefore(";")
                     .split(",")
                     .map { it.trim() }
                     .filter { it.isNotEmpty() }
-
                 declarations.forEach { declaration ->
                     if (declaration.contains("=")) {
                         val name = declaration.substringBefore("=").trim()
@@ -273,10 +238,6 @@ fun interpretCode(blocks: List<String>): String {
                             declaredVariables.add(name)
                             output.append("Ошибка инициализации переменной $name: ${e.message}\n")
                         }
-                    } else {
-                        variables[declaration] = 0
-                        declaredVariables.add(declaration)
-                        output.append("Переменная $declaration = 0\n")
                     }
                 }
             }
@@ -284,20 +245,10 @@ fun interpretCode(blocks: List<String>): String {
     }
 
     val loopStack = mutableListOf<LoopState>()
-    val conditionStack = mutableListOf<ConditionState>()
+    val conditionStack = mutableListOf<Boolean>()
     var currentNesting = 0
     var blockCounter = 0
-
-    fun shouldExecute(): Boolean {
-        if (conditionStack.isEmpty()) return true
-        var deepestActive = -1
-        conditionStack.forEach {
-            if (it.conditionMet && it.nestingLevel > deepestActive) {
-                deepestActive = it.nestingLevel
-            }
-        }
-        return deepestActive >= currentNesting
-    }
+    var skipUntilNesting: Int? = null
 
     while (blockCounter < blocks.size) {
         val block = blocks[blockCounter]
@@ -306,47 +257,49 @@ fun interpretCode(blocks: List<String>): String {
         try {
             when {
                 trimmed.startsWith("for") -> {
-                    val parts = trimmed.substringAfter("for (").substringBefore(")").split(";")
-                    if (parts.size == 3) {
-                        val init = parts[0].trim()
-                        if (init.startsWith("int ")) {
-                            val name = init.substringAfter("int ").substringBefore("=").trim()
-                            val expr = init.substringAfter("=").trim()
-                            val value = evaluateRPN(toRPN(expr))
-                            variables[name] = value
-                            declaredVariables.add(name)
-                        }
-
-                        val condition = parts[1].trim()
-                        val conditionParts = condition.split("<=", "<", ">=", ">", "!=", "==")
-                        if (conditionParts.size == 2) {
-                            val varName = conditionParts[0].trim()
-                            val endExpr = conditionParts[1].trim()
-                            val end = evaluateRPN(toRPN(endExpr))
-
-                            var step = 1
-                            val stepPart = parts[2].trim()
-                            if (stepPart.contains("+=")) {
-                                step = stepPart.substringAfter("+=").trim().toIntOrNull() ?: 1
-                            } else if (stepPart.contains("-=")) {
-                                step = -1 * (stepPart.substringAfter("-=").trim().toIntOrNull() ?: 1)
-                            } else if (stepPart.contains("++")) {
-                                step = 1
-                            } else if (stepPart.contains("--")) {
-                                step = -1
+                    if (skipUntilNesting == null) {
+                        val parts = trimmed.substringAfter("for (").substringBefore(")").split(";")
+                        if (parts.size == 3) {
+                            val init = parts[0].trim()
+                            if (init.startsWith("int ")) {
+                                val name = init.substringAfter("int ").substringBefore("=").trim()
+                                val expr = init.substringAfter("=").trim()
+                                val value = evaluateRPN(toRPN(expr))
+                                variables[name] = value
+                                declaredVariables.add(name)
                             }
 
-                            val currentValue = variables[varName] as? Int ?: 0
-                            loopStack.add(
-                                LoopState(
-                                    varName,
-                                    currentValue,
-                                    end,
-                                    step,
-                                    blockCounter,
-                                    currentNesting + 1
+                            val condition = parts[1].trim()
+                            val conditionParts = condition.split("<=", "<", ">=", ">", "!=", "==")
+                            if (conditionParts.size == 2) {
+                                val varName = conditionParts[0].trim()
+                                val endExpr = conditionParts[1].trim()
+                                val end = evaluateRPN(toRPN(endExpr))
+
+                                var step = 1
+                                val stepPart = parts[2].trim()
+                                if (stepPart.contains("+=")) {
+                                    step = stepPart.substringAfter("+=").trim().toIntOrNull() ?: 1
+                                } else if (stepPart.contains("-=")) {
+                                    step = -1 * (stepPart.substringAfter("-=").trim().toIntOrNull() ?: 1)
+                                } else if (stepPart.contains("++")) {
+                                    step = 1
+                                } else if (stepPart.contains("--")) {
+                                    step = -1
+                                }
+
+                                val currentValue = variables[varName] as? Int ?: 0
+                                loopStack.add(
+                                    LoopState(
+                                        varName,
+                                        currentValue,
+                                        end,
+                                        step,
+                                        blockCounter,
+                                        currentNesting + 1
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
                     currentNesting++
@@ -373,10 +326,9 @@ fun interpretCode(blocks: List<String>): String {
                         }
                     }
 
-                    if (conditionStack.isNotEmpty() && conditionStack.last().nestingLevel == currentNesting) {
-                        conditionStack.removeAt(conditionStack.lastIndex)
+                    if (skipUntilNesting != null && currentNesting <= skipUntilNesting!!) {
+                        skipUntilNesting = null
                     }
-
                     currentNesting = maxOf(0, currentNesting - 1)
                     blockCounter++
                 }
@@ -384,13 +336,30 @@ fun interpretCode(blocks: List<String>): String {
                 trimmed.startsWith("if") -> {
                     val condition = trimmed.substringAfter("if").substringBefore("{").trim()
                     val conditionMet = evaluateCondition(condition.removeSurrounding("(", ")"))
-                    conditionStack.add(ConditionState(conditionMet, currentNesting + 1))
+                    conditionStack.add(conditionMet)
+
+                    if (!conditionMet) {
+                        skipUntilNesting = currentNesting
+                    }
+                    currentNesting++
+                    blockCounter++
+                }
+
+                trimmed.startsWith("else") -> {
+                    if (conditionStack.isNotEmpty()) {
+                        val lastCondition = conditionStack.removeAt(conditionStack.size - 1)
+                        if (lastCondition) {
+                            skipUntilNesting = currentNesting
+                        } else {
+                            skipUntilNesting = null
+                        }
+                    }
                     currentNesting++
                     blockCounter++
                 }
 
                 else -> {
-                    if (shouldExecute()) {
+                    if (skipUntilNesting == null) {
                         when {
                             trimmed.startsWith("int[]") -> {
                                 val name = trimmed.substringAfter("int[]").substringBefore("=").trim()
@@ -406,24 +375,20 @@ fun interpretCode(blocks: List<String>): String {
                                     variables[name] = intArrayOf()
                                 }
                             }
-
                             trimmed.startsWith("int") && !trimmed.contains("=") -> {
                                 val names = trimmed.substringAfter("int")
                                     .substringBefore(";")
                                     .split(",")
                                     .map { it.trim() }
                                     .filter { it.isNotEmpty() }
-
                                 names.forEach { name ->
                                     variables[name] = 0
                                     declaredVariables.add(name)
                                 }
                             }
-
                             trimmed.contains("=") && !trimmed.startsWith("int") -> {
                                 val left = trimmed.substringBefore("=").trim()
                                 val right = trimmed.substringAfter("=").substringBefore(";").trim()
-
                                 if (left.contains("[")) {
                                     val arrName = left.substringBefore("[").trim()
                                     val indexExpr = left.substringAfter("[").substringBefore("]").trim()
@@ -433,19 +398,15 @@ fun interpretCode(blocks: List<String>): String {
                                 } else {
                                     val value = evaluateRPN(toRPN(right))
                                     variables[left] = value
-                                    if (left !in declaredVariables) {
-                                        declaredVariables.add(left)
-                                    }
+                                    if (left !in declaredVariables) declaredVariables.add(left)
                                 }
                             }
-
                             trimmed.startsWith("int") && trimmed.contains("=") -> {
                                 val declarations = trimmed.substringAfter("int")
                                     .substringBefore(";")
                                     .split(",")
                                     .map { it.trim() }
                                     .filter { it.isNotEmpty() }
-
                                 declarations.forEach { declaration ->
                                     if (declaration.contains("=")) {
                                         val name = declaration.substringBefore("=").trim()
@@ -471,6 +432,7 @@ fun interpretCode(blocks: List<String>): String {
             blockCounter++
         }
     }
+
     if (errors.isNotEmpty()) {
         output.insert(0, "--- ОШИБКИ ---\n${errors.joinToString("\n")}\n\n")
     }

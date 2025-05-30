@@ -38,6 +38,8 @@ fun BlockItem(
         hasError -> MaterialTheme.colorScheme.errorContainer
         text.trim() == stringResource(R.string.close_block) ->
             MaterialTheme.colorScheme.secondaryContainer
+        text.trim().startsWith("else") ->
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f)
         text.trim().endsWith("{") ->
             MaterialTheme.colorScheme.primaryContainer
         else ->

@@ -48,4 +48,13 @@
     <string name="for_checker_loop_body">sum = sum + i;</string>
     <string name="for_checker_close">}</string>
     <string name="for_checker">For Checker</string>
+
+    <string name="if_else_checker">If-Else Checker</string>
+    <string name="if_else_var_declaration">int x, y, z;</string>
+    <string name="if_else_assignment">x = 5;</string>
+    <string name="if_else_if">if (x == 10) {</string>
+    <string name="if_else_if_body">y = 1;</string>
+    <string name="if_else_else">else {</string>
+    <string name="if_else_else_body">z = 1;</string>
+    <string name="if_else_close">}</string>
 </resources>
