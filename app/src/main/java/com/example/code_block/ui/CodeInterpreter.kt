@@ -8,6 +8,7 @@ data class LoopState(val varName: String,
                      val nestingLevel: Int)
 
 data class ConditionState(val conditionMet: Boolean, val nestingLevel: Int)
+
 fun calculateNestingLevels(blocks: List<String>): List<Int> {
     var level = 0
     return blocks.map { block ->
@@ -37,7 +38,6 @@ fun interpretCode(blocks: List<String>): String {
         '*', '/', '%' -> 2
         else -> 0
     }
-
 
     fun toRPN(expression: String): List<String> {
         val outPut = mutableListOf<String>()
@@ -118,6 +118,7 @@ fun interpretCode(blocks: List<String>): String {
         }
         return stack.lastOrNull() ?: 0
     }
+
     fun evaluateCondition(condition: String): Boolean {
         val ops = listOf("==", "!=", ">=", "<=", ">", "<")
         val op = ops.firstOrNull { condition.contains(it) } ?: return false
@@ -138,6 +139,7 @@ fun interpretCode(blocks: List<String>): String {
             else -> false
         }
     }
+
     output.append("---НАЧАЛЬНЫЕ ЗНАЧЕНИЯ---\n")
     blocks.forEach { block ->
         val trimmed = block.trim()
@@ -239,12 +241,6 @@ fun interpretCode(blocks: List<String>): String {
                 else -> {
                     if (shouldExecute) {
                         when {
-                            trimmed.startsWith("int temp") -> {
-                                val expr = trimmed.substringAfter("=").substringBefore(";").trim()
-                                val value = evaluateRPN(toRPN(expr))
-                                variables["temp"] = value
-                            }
-
                             trimmed.contains("=") -> {
                                 val left = trimmed.substringBefore("=").trim()
                                 val right = trimmed.substringAfter("=").substringBefore(";").trim()
