@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.example.code_block.R
+import androidx.compose.material.icons.filled.Done
 
 @Composable
 fun BlockItem(
@@ -27,6 +28,10 @@ fun BlockItem(
 ) {
     var isEditing by remember { mutableStateOf(false) }
     var editedText by remember { mutableStateOf(text) }
+
+    LaunchedEffect(text) {
+        editedText = text
+    }
     val blockColor = when {
         text.trim() == stringResource(R.string.close_block) ->
             MaterialTheme.colorScheme.secondaryContainer
@@ -41,14 +46,14 @@ fun BlockItem(
     ) {
         Card(
             colors = CardDefaults.cardColors(containerColor = blockColor),
-            modifier = Modifier.widthIn(min = 100.dp, max = 300.dp)
+            modifier = Modifier.fillMaxWidth()
         ) {
             if (isEditing) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    TextField(
+                Column {
+                    OutlinedTextField(
                         value = editedText,
                         onValueChange = { editedText = it },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                         keyboardActions = KeyboardActions(
@@ -58,28 +63,37 @@ fun BlockItem(
                             }
                         )
                     )
-                    IconButton(onClick = { onBlockRemoved(index) }) {
-                        Icon(
-                            Icons.Default.Delete,
-                            stringResource(R.string.delete)
-                        )
+                    Row(
+                        horizontalArrangement = Arrangement.End,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        IconButton(onClick = {
+                            isEditing = false
+                            onBlockChanged(index, editedText)
+                        }) {
+                            Icon(Icons.Filled.Done, contentDescription = "Сохранить")
+                        }
+                        IconButton(onClick = { onBlockRemoved(index) }) {
+                            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete))
+                        }
                     }
                 }
             } else {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable { isEditing = true }
+                    modifier = Modifier
+                        .clickable { isEditing = true }
+                        .fillMaxWidth()
                 ) {
                     Text(
                         text = text,
-                        modifier = Modifier.weight(1f).padding(12.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(12.dp),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     IconButton(onClick = { isEditing = true }) {
-                        Icon(
-                            Icons.Default.Edit,
-                            stringResource(R.string.edit)
-                        )
+                        Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.edit))
                     }
                 }
             }
