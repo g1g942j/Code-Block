@@ -21,6 +21,7 @@ fun MainScreen() {
     var outputText by remember { mutableStateOf("") }
 
     val nestingLevels = remember(blocks) { calculateNestingLevels(blocks) }
+    val errorIndices = remember(blocks) { validateCodeStructure(blocks) }
 
     Scaffold(
         topBar = {
@@ -35,10 +36,19 @@ fun MainScreen() {
                     }
                 },
                 actions = {
-                    Button(onClick = {
-                        outputText = interpretCode(blocks)
-                        showOutput = true
-                    }) {
+                    Button(
+                        onClick = {
+                            if (errorIndices.isEmpty()) {
+                                outputText = interpretCode(blocks)
+                                showOutput = true
+                            } else {
+                                outputText = "Исправьте ошибки перед выполнением:\n" +
+                                        errorIndices.joinToString { "#${it + 1}" }
+                                showOutput = true
+                            }
+                        },
+                        enabled = blocks.isNotEmpty()
+                    ) {
                         Text(stringResource(R.string.run))
                     }
                 }
@@ -69,7 +79,8 @@ fun MainScreen() {
                         }
                     }
                 },
-                onClear = { blocks = emptyList() }
+                onClear = { blocks = emptyList() },
+                errorIndices = errorIndices
             )
 
             AnimatedVisibility(

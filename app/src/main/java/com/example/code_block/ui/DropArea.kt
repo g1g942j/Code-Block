@@ -24,7 +24,8 @@ fun DropArea(
     onBlockChanged: (Int, String) -> Unit,
     onBlockRemoved: (Int) -> Unit,
     onBlockMoved: (Int, Int) -> Unit,
-    onClear: () -> Unit
+    onClear: () -> Unit,
+    errorIndices: List<Int>
 ) {
     val listState = rememberLazyListState()
     var draggedItem by remember { mutableStateOf<Int?>(null) }
@@ -72,6 +73,7 @@ fun DropArea(
                         text = block,
                         index = index,
                         nestingLevel = nestingLevels[index],
+                        hasError = errorIndices.contains(index),
                         onBlockChanged = onBlockChanged,
                         onBlockRemoved = onBlockRemoved,
                         modifier = Modifier
