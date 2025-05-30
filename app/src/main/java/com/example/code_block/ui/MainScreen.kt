@@ -1,15 +1,17 @@
 package com.example.code_block.ui
-
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.example.code_block.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -19,9 +21,9 @@ fun MainScreen() {
     var blocks by remember { mutableStateOf(emptyList<String>()) }
     var showOutput by remember { mutableStateOf(false) }
     var outputText by remember { mutableStateOf("") }
+    var editMode by remember { mutableStateOf(false) }
 
     val nestingLevels = remember(blocks) { calculateNestingLevels(blocks) }
-    val errorIndices = remember(blocks) { validateCodeStructure(blocks) }
 
     Scaffold(
         topBar = {
@@ -29,23 +31,24 @@ fun MainScreen() {
                 title = { Text(stringResource(R.string.app_name)) },
                 navigationIcon = {
                     IconButton(onClick = { showMenu = !showMenu }) {
-                        Icon(
-                            Icons.Default.Menu,
-                            stringResource(R.string.menu)
-                        )
+                        Icon(Icons.Default.Menu, stringResource(R.string.menu))
                     }
                 },
                 actions = {
+                    IconButton(
+                        onClick = { editMode = !editMode },
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (editMode) Icons.Default.Done else Icons.Default.Edit,
+                            contentDescription = if (editMode) "Exit Edit" else "Edit Blocks"
+                        )
+                    }
+
                     Button(
                         onClick = {
-                            if (errorIndices.isEmpty()) {
-                                outputText = interpretCode(blocks)
-                                showOutput = true
-                            } else {
-                                outputText = "Исправьте ошибки перед выполнением:\n" +
-                                        errorIndices.joinToString { "#${it + 1}" }
-                                showOutput = true
-                            }
+                            outputText = interpretCode(blocks)
+                            showOutput = true
                         },
                         enabled = blocks.isNotEmpty()
                     ) {
@@ -55,11 +58,7 @@ fun MainScreen() {
             )
         }
     ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-        ) {
+        Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
             DropArea(
                 blocks = blocks,
                 nestingLevels = nestingLevels,
@@ -80,7 +79,7 @@ fun MainScreen() {
                     }
                 },
                 onClear = { blocks = emptyList() },
-                errorIndices = errorIndices
+                editMode = editMode
             )
 
             AnimatedVisibility(
