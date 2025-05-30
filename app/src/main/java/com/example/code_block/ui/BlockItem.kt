@@ -27,6 +27,10 @@ fun BlockItem(
     onBlockRemoved: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val isUneditable = text.trim().let { trimmed ->
+        trimmed == stringResource(R.string.close_block) || trimmed.startsWith("else")
+    }
+
     var isEditing by remember { mutableStateOf(false) }
     var editedText by remember { mutableStateOf(text) }
 
@@ -55,7 +59,7 @@ fun BlockItem(
                 .fillMaxWidth()
                 .widthIn(min = 100.dp, max = 300.dp)
         ) {
-            if (isEditing) {
+            if (isEditing && !isUneditable) {
                 Column {
                     OutlinedTextField(
                         value = editedText,
@@ -97,7 +101,7 @@ fun BlockItem(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .clickable { isEditing = true }
+                        .clickable(enabled = !isUneditable) { isEditing = true }
                         .fillMaxWidth()
                 ) {
                     Text(
@@ -107,11 +111,16 @@ fun BlockItem(
                             .padding(12.dp),
                         style = MaterialTheme.typography.bodyMedium
                     )
-                    IconButton(onClick = { isEditing = true }) {
-                        Icon(
-                            Icons.Filled.Edit,
-                            contentDescription = stringResource(R.string.edit)
-                        )
+                    if (!isUneditable) {
+                        IconButton(
+                            onClick = { isEditing = true },
+                            enabled = !isUneditable
+                        ) {
+                            Icon(
+                                Icons.Filled.Edit,
+                                contentDescription = stringResource(R.string.edit)
+                            )
+                        }
                     }
                 }
             }
