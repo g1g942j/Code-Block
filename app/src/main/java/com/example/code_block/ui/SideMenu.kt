@@ -16,7 +16,9 @@ fun SideMenu(
     val context = LocalContext.current
 
     Column(
-        modifier = modifier.width(200.dp).padding(8.dp)
+        modifier = modifier
+            .width(200.dp)
+            .padding(8.dp)
     ) {
         listOf(
             R.string.variable_text to R.string.variable,
@@ -29,7 +31,9 @@ fun SideMenu(
                 onClick = {
                     onBlockAdded(context.getString(textRes))
                 },
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
             ) {
                 Text(context.getString(labelRes))
             }
@@ -52,7 +56,9 @@ fun SideMenu(
                     onBlockAdded(context.getString(resId))
                 }
             },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
         ) {
             Text(context.getString(R.string.bubble_sort))
         }

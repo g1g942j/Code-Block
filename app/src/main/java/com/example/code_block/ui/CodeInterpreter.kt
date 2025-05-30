@@ -1,11 +1,13 @@
 package com.example.code_block.ui
 
-data class LoopState(val varName: String,
-                     var current: Int,
-                     val end: Int,
-                     val step: Int,
-                     val startblockCounter: Int,
-                     val nestingLevel: Int)
+data class LoopState(
+    val varName: String,
+    var current: Int,
+    val end: Int,
+    val step: Int,
+    val startblockCounter: Int,
+    val nestingLevel: Int
+)
 
 data class ConditionState(val conditionMet: Boolean, val nestingLevel: Int)
 
@@ -19,10 +21,12 @@ fun calculateNestingLevels(blocks: List<String>): List<Int> {
                 level++
                 currentLevel
             }
+
             trimmed == "}" -> {
                 level = maxOf(0, level - 1)
                 level
             }
+
             else -> level
         }
     }
@@ -54,6 +58,7 @@ fun interpretCode(blocks: List<String>): String {
                     }
                     outPut.add(num.toString())
                 }
+
                 expression[i].isLetter() -> {
                     val varName = StringBuilder()
                     while (i < expression.length && (expression[i].isLetterOrDigit() || expression[i] == '_')) {
@@ -61,9 +66,11 @@ fun interpretCode(blocks: List<String>): String {
                     }
                     outPut.add(varName.toString())
                 }
+
                 expression[i] == '(' -> {
                     operators.add(expression[i++])
                 }
+
                 expression[i] == ')' -> {
                     while (operators.isNotEmpty() && operators.last() != '(') {
                         outPut.add(operators.last().toString())
@@ -74,8 +81,12 @@ fun interpretCode(blocks: List<String>): String {
                     }
                     i++
                 }
+
                 else -> {
-                    while (operators.isNotEmpty() && precedence(operators.last()) >= precedence(expression[i])) {
+                    while (operators.isNotEmpty() && precedence(operators.last()) >= precedence(
+                            expression[i]
+                        )
+                    ) {
                         outPut.add(operators.last().toString())
                         operators.removeAt(operators.lastIndex)
                     }
@@ -104,15 +115,18 @@ fun interpretCode(blocks: List<String>): String {
                     stack.removeAt(stack.lastIndex)
                     val a = stack.last()
                     stack.removeAt(stack.lastIndex)
-                    stack.add(when (token) {
-                        "+" -> a + b
-                        "-" -> a - b
-                        "*" -> a * b
-                        "/" -> if (b != 0) a / b else 0
-                        "%" -> if (b != 0) a % b else 0
-                        else -> 0
-                    })
+                    stack.add(
+                        when (token) {
+                            "+" -> a + b
+                            "-" -> a - b
+                            "*" -> a * b
+                            "/" -> if (b != 0) a / b else 0
+                            "%" -> if (b != 0) a % b else 0
+                            else -> 0
+                        }
+                    )
                 }
+
                 else -> stack.add(0)
             }
         }
@@ -160,6 +174,7 @@ fun interpretCode(blocks: List<String>): String {
                     output.append("Ошибка инициализации массива $name: ${e.message}\n")
                 }
             }
+
             trimmed.startsWith("int") && trimmed.contains("=") -> {
                 val name = trimmed.substringAfter("int").substringBefore("=").trim()
                 declaredVariables.add(name)
@@ -206,12 +221,22 @@ fun interpretCode(blocks: List<String>): String {
                             val varName = conditionParts[0].trim()
                             val endExpr = conditionParts[1].trim()
                             val end = evaluateRPN(toRPN(endExpr))
-                            loopStack.add(LoopState(varName, variables[varName] as Int, end, 1, blockCounter, currentNesting + 1))
+                            loopStack.add(
+                                LoopState(
+                                    varName,
+                                    variables[varName] as Int,
+                                    end,
+                                    1,
+                                    blockCounter,
+                                    currentNesting + 1
+                                )
+                            )
                         }
                     }
                     currentNesting++
                     blockCounter++
                 }
+
                 trimmed == "}" -> {
                     if (loopStack.isNotEmpty() && loopStack.last().nestingLevel == currentNesting) {
                         val loop = loopStack.last()
@@ -238,6 +263,7 @@ fun interpretCode(blocks: List<String>): String {
                     currentNesting++
                     blockCounter++
                 }
+
                 else -> {
                     if (shouldExecute) {
                         when {
@@ -247,7 +273,8 @@ fun interpretCode(blocks: List<String>): String {
 
                                 if (left.contains("[")) {
                                     val arrName = left.substringBefore("[").trim()
-                                    val indexExpr = left.substringAfter("[").substringBefore("]").trim()
+                                    val indexExpr =
+                                        left.substringAfter("[").substringBefore("]").trim()
                                     val index = evaluateRPN(toRPN(indexExpr))
                                     val value = evaluateRPN(toRPN(right))
                                     (variables[arrName] as? IntArray)?.set(index, value)

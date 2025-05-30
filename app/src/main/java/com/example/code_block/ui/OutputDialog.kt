@@ -15,7 +15,9 @@ fun OutputDialog(output: String, onDismiss: () -> Unit) {
         title = { Text("Результат выполнения") },
         text = {
             Column(
-                modifier = Modifier.fillMaxWidth().heightIn(max = 400.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 400.dp)
                     .verticalScroll(rememberScrollState())
             ) {
                 Text(output, style = MaterialTheme.typography.bodyMedium)

@@ -35,8 +35,10 @@ fun BlockItem(
     val blockColor = when {
         text.trim() == stringResource(R.string.close_block) ->
             MaterialTheme.colorScheme.secondaryContainer
+
         text.trim().endsWith("{") ->
             MaterialTheme.colorScheme.primaryContainer
+
         else ->
             MaterialTheme.colorScheme.tertiaryContainer
     }
@@ -74,7 +76,10 @@ fun BlockItem(
                             Icon(Icons.Filled.Done, contentDescription = "Сохранить")
                         }
                         IconButton(onClick = { onBlockRemoved(index) }) {
-                            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.delete))
+                            Icon(
+                                Icons.Filled.Delete,
+                                contentDescription = stringResource(R.string.delete)
+                            )
                         }
                     }
                 }

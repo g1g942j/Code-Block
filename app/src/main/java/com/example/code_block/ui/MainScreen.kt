@@ -46,7 +46,9 @@ fun MainScreen() {
         }
     ) { paddingValues ->
         Box(
-            modifier = Modifier.padding(paddingValues).fillMaxSize()
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
         ) {
             DropArea(
                 blocks = blocks,

@@ -30,9 +30,14 @@ fun DropArea(
     var draggedItem by remember { mutableStateOf<Int?>(null) }
     val scope = rememberCoroutineScope()
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(16.dp)) {
         LazyColumn(
-            modifier = Modifier.weight(1f).fillMaxWidth().padding(bottom = 16.dp),
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
             state = listState
         ) {
             itemsIndexed(blocks) { index, block ->
