@@ -7,16 +7,21 @@
     <string name="edit">Edit</string>
     <string name="save">Save</string>
 
-    <string name="variable">Variable</string>
-    <string name="variable_text">int x = 0;</string>
+    <string name="variable">Variables</string>
     <string name="array">Array</string>
     <string name="array_text">int[] arr = {1,2,3};</string>
     <string name="loop">For Loop</string>
     <string name="for_loop_text">for (int i=0; i &lt; 10; i++) {</string>
-    <string name="condition">If Condition</string>
-    <string name="if_text">if (condition) {</string>
+    <string name="condition">If</string>
+    <string name="if_text">if () {</string>
+    <string name="else_block">Else</string>
+    <string name="else_text">else {</string>
     <string name="close">Close Block</string>
     <string name="close_block">}</string>
+    <string name="variable_declaration">Variable Declaration</string>
+    <string name="variable_declaration_text">int x, y, z;</string>
+    <string name="variable_assignment">Variable Assignment</string>
+    <string name="variable_assignment_text">x = 0;</string>
 
     <string name="bubble_sort">Bubble Sort</string>
     <string name="bubble_sort_array">int[] arr = {5,3,1,4,2};</string>

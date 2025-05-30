@@ -175,17 +175,78 @@ fun interpretCode(blocks: List<String>): String {
                 }
             }
 
-            trimmed.startsWith("int") && trimmed.contains("=") -> {
-                val name = trimmed.substringAfter("int").substringBefore("=").trim()
-                declaredVariables.add(name)
-                try {
-                    val expr = trimmed.substringAfter("=").substringBefore(";").trim()
-                    val value = evaluateRPN(toRPN(expr))
-                    variables[name] = value
-                    output.append("Переменная $name = $value\n")
-                } catch (e: Exception) {
+            trimmed.startsWith("int") && !trimmed.contains("=") -> {
+                val names = trimmed.substringAfter("int")
+                    .substringBefore(";")
+                    .split(",")
+                    .map { it.trim() }
+                    .filter { it.isNotEmpty() }
+
+                names.forEach { name ->
                     variables[name] = 0
-                    output.append("Ошибка инициализации переменной $name: ${e.message}\n")
+                    declaredVariables.add(name)
+                    output.append("Переменная $name = 0\n")
+                }
+            }
+
+            trimmed.contains("=") && !trimmed.startsWith("int") -> {
+                val left = trimmed.substringBefore("=").trim()
+                val right = trimmed.substringAfter("=").substringBefore(";").trim()
+
+                if (left.contains("[")) {
+                    val arrName = left.substringBefore("[").trim()
+                    val indexExpr = left.substringAfter("[").substringBefore("]").trim()
+                    val index = evaluateRPN(toRPN(indexExpr))
+                    val value = evaluateRPN(toRPN(right))
+                    (variables[arrName] as? IntArray)?.set(index, value)
+                } else {
+                    if (left.contains(",")) {
+                        val vars = left.split(",").map { it.trim() }
+                        val value = evaluateRPN(toRPN(right))
+                        vars.forEach { name ->
+                            variables[name] = value
+                            if (name !in declaredVariables) {
+                                declaredVariables.add(name)
+                            }
+                            output.append("Переменная $name = $value\n")
+                        }
+                    } else {
+                        val value = evaluateRPN(toRPN(right))
+                        variables[left] = value
+                        if (left !in declaredVariables) {
+                            declaredVariables.add(left)
+                        }
+                        output.append("Переменная $left = $value\n")
+                    }
+                }
+            }
+
+            trimmed.startsWith("int") && trimmed.contains("=") -> {
+                val declarations = trimmed.substringAfter("int")
+                    .substringBefore(";")
+                    .split(",")
+                    .map { it.trim() }
+                    .filter { it.isNotEmpty() }
+
+                declarations.forEach { declaration ->
+                    if (declaration.contains("=")) {
+                        val name = declaration.substringBefore("=").trim()
+                        val expr = declaration.substringAfter("=").trim()
+                        try {
+                            val value = evaluateRPN(toRPN(expr))
+                            variables[name] = value
+                            declaredVariables.add(name)
+                            output.append("Переменная $name = $value\n")
+                        } catch (e: Exception) {
+                            variables[name] = 0
+                            declaredVariables.add(name)
+                            output.append("Ошибка инициализации переменной $name: ${e.message}\n")
+                        }
+                    } else {
+                        variables[declaration] = 0
+                        declaredVariables.add(declaration)
+                        output.append("Переменная $declaration = 0\n")
+                    }
                 }
             }
         }

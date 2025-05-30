@@ -20,9 +20,50 @@ fun SideMenu(
             .width(200.dp)
             .padding(8.dp)
     ) {
+        Text(
+            text = context.getString(R.string.variable),
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
+
         listOf(
-            R.string.variable_text to R.string.variable,
-            R.string.array_text to R.string.array,
+            R.string.variable_declaration_text to R.string.variable_declaration,
+            R.string.variable_assignment_text to R.string.variable_assignment,
+        ).forEach { (textRes, labelRes) ->
+            Button(
+                onClick = {
+                    onBlockAdded(context.getString(textRes))
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+            ) {
+                Text(context.getString(labelRes))
+            }
+        }
+
+        Text(
+            text = context.getString(R.string.array),
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
+        Button(
+            onClick = {
+                onBlockAdded(context.getString(R.string.array_text))
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+        ) {
+            Text(context.getString(R.string.array))
+        }
+
+        Text(
+            text = "Control Structures",
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
+        listOf(
             R.string.for_loop_text to R.string.loop,
             R.string.if_text to R.string.condition,
             R.string.close_block to R.string.close
@@ -39,6 +80,11 @@ fun SideMenu(
             }
         }
 
+        Text(
+            text = "Examples",
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
         Button(
             onClick = {
                 listOf(
@@ -58,7 +104,7 @@ fun SideMenu(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp)
+                .padding(vertical = 4.dp)
         ) {
             Text(context.getString(R.string.bubble_sort))
         }
