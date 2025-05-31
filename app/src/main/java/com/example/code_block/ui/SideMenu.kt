@@ -40,7 +40,7 @@ fun SideMenu(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp)
+                    .padding(vertical = 3.dp)
             ) {
                 Text(context.getString(labelRes))
             }
@@ -58,7 +58,7 @@ fun SideMenu(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 4.dp)
+                .padding(vertical = 3.dp)
         ) {
             Text(declareArray)
         }
@@ -69,7 +69,7 @@ fun SideMenu(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 4.dp)
+                .padding(vertical = 3.dp)
         ) {
             Text(stringResource(R.string.array_assignment_text))
         }
@@ -91,7 +91,7 @@ fun SideMenu(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp)
+                    .padding(vertical = 3.dp)
             ) {
                 Text(context.getString(labelRes))
             }
@@ -128,7 +128,7 @@ fun SideMenu(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 4.dp)
+                .padding(vertical = 3.dp)
         ) {
             Text(context.getString(R.string.bubble_sort))
         }
@@ -146,7 +146,7 @@ fun SideMenu(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 4.dp)
+                .padding(vertical = 3.dp)
         ) {
             Text(stringResource(R.string.for_checker))
         }
@@ -167,7 +167,7 @@ fun SideMenu(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 4.dp)
+                .padding(vertical = 3.dp)
         ) {
             Text(context.getString(R.string.if_else_checker))
         }
@@ -188,9 +188,9 @@ fun SideMenu(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 4.dp)
+                .padding(vertical = 3.dp)
         ) {
-            Text(R.string.array_checker.toString())
+            Text(stringResource(R.string.array_checker))
         }
     }
 }

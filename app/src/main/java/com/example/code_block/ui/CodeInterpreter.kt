@@ -19,10 +19,12 @@ fun calculateNestingLevels(blocks: List<String>): List<Int> {
                 level++
                 currentLevel
             }
+
             trimmed == "}" -> {
                 level = maxOf(0, level - 1)
                 level
             }
+
             else -> level
         }
     }
@@ -40,6 +42,7 @@ fun validateCodeStructure(blocks: List<String>): List<Int> {
                 braceBalance--
                 if (braceBalance < 0) errorIndices.add(index)
             }
+
             trimmed.startsWith("}") -> errorIndices.add(index)
         }
     }
@@ -71,7 +74,7 @@ fun interpretCode(blocks: List<String>): String {
     }
 
     fun toRPN(expression: String): List<String> {
-        val outPut = mutableListOf<String>()
+        val output = mutableListOf<String>()
         val operators = mutableListOf<Char>()
         var i = 0
 
@@ -83,31 +86,36 @@ fun interpretCode(blocks: List<String>): String {
                     while (i < expression.length && expression[i].isDigit()) {
                         num.append(expression[i++])
                     }
-                    outPut.add(num.toString())
+                    output.add(num.toString())
                 }
+
                 expression[i].isLetter() -> {
                     val varName = StringBuilder()
-                    while (i < expression.length && (expression[i].isLetterOrDigit() || expression[i] == '_')) {
+                    while (i < expression.length && (expression[i].isLetterOrDigit() || expression[i] == '_' || expression[i] == '.')) {
                         varName.append(expression[i++])
                     }
-                    outPut.add(varName.toString())
+                    output.add(varName.toString())
                 }
+
                 expression[i] == '(' -> {
                     operators.add(expression[i++])
                 }
+
                 expression[i] == ')' -> {
                     while (operators.isNotEmpty() && operators.last() != '(') {
-                        outPut.add(operators.last().toString())
+                        output.add(operators.last().toString())
                         operators.removeAt(operators.lastIndex)
                     }
-                    if (operators.isNotEmpty()) {
-                        operators.removeAt(operators.lastIndex)
-                    }
+                    operators.removeLastOrNull()
                     i++
                 }
+
                 else -> {
-                    while (operators.isNotEmpty() && precedence(operators.last()) >= precedence(expression[i])) {
-                        outPut.add(operators.last().toString())
+                    while (operators.isNotEmpty() && precedence(operators.last()) >= precedence(
+                            expression[i]
+                        )
+                    ) {
+                        output.add(operators.last().toString())
                         operators.removeAt(operators.lastIndex)
                     }
                     operators.add(expression[i++])
@@ -116,11 +124,11 @@ fun interpretCode(blocks: List<String>): String {
         }
 
         while (operators.isNotEmpty()) {
-            outPut.add(operators.last().toString())
+            output.add(operators.last().toString())
             operators.removeAt(operators.lastIndex)
         }
 
-        return outPut
+        return output
     }
 
     fun evaluateRPN(rpn: List<String>): Int {
@@ -129,12 +137,17 @@ fun interpretCode(blocks: List<String>): String {
         for (token in rpn) {
             when {
                 token.toIntOrNull() != null -> stack.add(token.toInt())
+                token.endsWith(".length") -> {
+                    val arrayName = token.removeSuffix(".length")
+                    val array = variables[arrayName] as? IntArray
+                    stack.add(array?.size ?: 0)
+                }
+
                 variables.containsKey(token) -> stack.add(variables[token] as? Int ?: 0)
                 token in "+-*/%" -> {
-                    val b = stack.last()
-                    stack.removeAt(stack.lastIndex)
-                    val a = stack.last()
-                    stack.removeAt(stack.lastIndex)
+                    if (stack.size < 2) return 0
+                    val b = stack.removeAt(stack.lastIndex)
+                    val a = stack.removeAt(stack.lastIndex)
                     stack.add(
                         when (token) {
                             "+" -> a + b
@@ -146,6 +159,7 @@ fun interpretCode(blocks: List<String>): String {
                         }
                     )
                 }
+
                 else -> stack.add(0)
             }
         }
@@ -170,26 +184,116 @@ fun interpretCode(blocks: List<String>): String {
         }
     }
 
-    output.append("---НАЧАЛЬНЫЕ ЗНАЧЕНИЯ---\n")
+    fun String.containsAny(vararg strings: String): Boolean {
+        return strings.any { this.contains(it) }
+    }
+
+    output.append("---ХОД РАБОТЫ---\n")
     blocks.forEach { block ->
         val trimmed = block.trim()
         when {
-            trimmed.startsWith("int[]") -> {
-                val name = trimmed.substringAfter("int[]").substringBefore("=").trim()
+            trimmed.startsWith("int[]") && trimmed.contains("new array[") -> {
+                val name = trimmed.substringBefore("=").trim().substringAfter("int[]").trim()
                 declaredVariables.add(name)
                 try {
-                    val values = trimmed.substringAfter("{")
-                        .substringBefore("}")
-                        .split(",")
-                        .map { it.trim().toInt() }
-                        .toIntArray()
-                    variables[name] = values
-                    output.append("Массив $name: [${values.joinToString()}]\n")
+                    val sizePart = trimmed.substringAfter("new array[").substringBefore("]").trim()
+                    val size = evaluateRPN(toRPN(sizePart))
+                    if (size < 0) {
+                        variables[name] = IntArray(0)
+                        output.append("Ошибка: размер массива не может быть отрицательным\n")
+                    } else {
+                        variables[name] = IntArray(size) { 0 }
+                        output.append("Объявлен массив $name размером $size, инициализированный нулями\n")
+                    }
                 } catch (e: Exception) {
-                    variables[name] = intArrayOf()
-                    output.append("Ошибка инициализации массива $name: ${e.message}\n")
+                    variables[name] = IntArray(0)
+                    output.append("Ошибка создания массива $name: ${e.message}\n")
                 }
             }
+
+            trimmed.contains("[") && trimmed.contains("] =") -> {
+                try {
+                    val leftPart = trimmed.substringBefore("=").trim()
+                    val rightPart = trimmed.substringAfter("=").substringBefore(";").trim()
+                    val arrName = leftPart.substringBefore("[").trim()
+                    val indexExpr = leftPart.substringAfter("[").substringBefore("]").trim()
+
+                    val array = variables[arrName] as? IntArray
+                    if (array == null) {
+                        output.append("Ошибка: массив $arrName не найден\n")
+                    } else {
+                        val index = evaluateRPN(toRPN(indexExpr))
+
+                        if (index !in array.indices) {
+                            output.append("Ошибка: индекс $index выходит за границы массива $arrName (размер ${array.size})\n")
+                        } else {
+                            val value = evaluateRPN(toRPN(rightPart))
+
+                            array[index] = value
+                            output.append("$arrName[$index] = $value\n")
+                        }
+                    }
+                } catch (e: Exception) {
+                    output.append("Ошибка при присваивании элемента массива: ${e.message}\n")
+                }
+            }
+
+            trimmed.contains("=") && trimmed.containsAny(
+                "+",
+                "-",
+                "*",
+                "/",
+                "%"
+            ) && trimmed.contains("[") -> {
+                try {
+                    val leftVar = trimmed.substringBefore("=").trim()
+                    val rightExpr = trimmed.substringAfter("=").substringBefore(";").trim()
+
+                    val operator = rightExpr.firstOrNull { it in "+-*/%" }
+                        ?: throw Exception("Оператор не найден")
+
+                    val parts = rightExpr.split(operator).map { it.trim() }
+                    if (parts.size == 2) {
+                        val leftPart = parts[0]
+                        val arrayPart = parts[1]
+
+                        val leftValue = when {
+                            leftPart.toIntOrNull() != null -> leftPart.toInt()
+                            variables.containsKey(leftPart) -> variables[leftPart] as? Int ?: 0
+                            else -> throw Exception("Неизвестная переменная: $leftPart")
+                        }
+
+                        if (arrayPart.contains("[")) {
+                            val arrName = arrayPart.substringBefore("[").trim()
+                            val indexExpr =
+                                arrayPart.substringAfter("[").substringBefore("]").trim()
+
+                            val index = evaluateRPN(toRPN(indexExpr))
+                            val array = variables[arrName] as? IntArray
+
+                            if (array != null && index in array.indices) {
+                                val arrayValue = array[index]
+                                val result = when (operator) {
+                                    '+' -> leftValue + arrayValue
+                                    '-' -> leftValue - arrayValue
+                                    '*' -> leftValue * arrayValue
+                                    '/' -> if (arrayValue != 0) leftValue / arrayValue else 0
+                                    '%' -> if (arrayValue != 0) leftValue % arrayValue else 0
+                                    else -> throw Exception("Неподдерживаемый оператор: $operator")
+                                }
+
+                                variables[leftVar] = result
+                                output.append("$leftVar = $result\n")
+                            } else {
+                                output.append("Ошибка: неверный индекс или массив\n")
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    output.append("Ошибка при вычислении выражения: ${e.message}\n")
+                }
+            }
+
             trimmed.startsWith("int") && !trimmed.contains("=") -> {
                 val names = trimmed.substringAfter("int")
                     .substringBefore(";")
@@ -202,7 +306,10 @@ fun interpretCode(blocks: List<String>): String {
                     output.append("Переменная $name = 0\n")
                 }
             }
-            trimmed.contains("=") && !trimmed.startsWith("int") && !trimmed.startsWith("if") && !trimmed.startsWith("for") -> {
+
+            trimmed.contains("=") && !trimmed.startsWith("int") && !trimmed.startsWith("if") && !trimmed.startsWith(
+                "for"
+            ) -> {
                 val left = trimmed.substringBefore("=").trim()
                 val right = trimmed.substringAfter("=").substringBefore(";").trim()
                 if (left.contains("[")) {
@@ -216,29 +323,6 @@ fun interpretCode(blocks: List<String>): String {
                     variables[left] = value
                     if (left !in declaredVariables) declaredVariables.add(left)
                     output.append("Переменная $left = $value\n")
-                }
-            }
-            trimmed.startsWith("int") && trimmed.contains("=") -> {
-                val declarations = trimmed.substringAfter("int")
-                    .substringBefore(";")
-                    .split(",")
-                    .map { it.trim() }
-                    .filter { it.isNotEmpty() }
-                declarations.forEach { declaration ->
-                    if (declaration.contains("=")) {
-                        val name = declaration.substringBefore("=").trim()
-                        val expr = declaration.substringAfter("=").trim()
-                        try {
-                            val value = evaluateRPN(toRPN(expr))
-                            variables[name] = value
-                            declaredVariables.add(name)
-                            output.append("Переменная $name = $value\n")
-                        } catch (e: Exception) {
-                            variables[name] = 0
-                            declaredVariables.add(name)
-                            output.append("Ошибка инициализации переменной $name: ${e.message}\n")
-                        }
-                    }
                 }
             }
         }
@@ -281,7 +365,8 @@ fun interpretCode(blocks: List<String>): String {
                                 if (stepPart.contains("+=")) {
                                     step = stepPart.substringAfter("+=").trim().toIntOrNull() ?: 1
                                 } else if (stepPart.contains("-=")) {
-                                    step = -1 * (stepPart.substringAfter("-=").trim().toIntOrNull() ?: 1)
+                                    step = -1 * (stepPart.substringAfter("-=").trim().toIntOrNull()
+                                        ?: 1)
                                 } else if (stepPart.contains("++")) {
                                     step = 1
                                 } else if (stepPart.contains("--")) {
@@ -361,20 +446,119 @@ fun interpretCode(blocks: List<String>): String {
                 else -> {
                     if (skipUntilNesting == null) {
                         when {
-                            trimmed.startsWith("int[]") -> {
-                                val name = trimmed.substringAfter("int[]").substringBefore("=").trim()
+                            trimmed.startsWith("int[]") && trimmed.contains("new array[") -> {
+                                val name =
+                                    trimmed.substringBefore("=").trim().substringAfter("int[]")
+                                        .trim()
                                 declaredVariables.add(name)
                                 try {
-                                    val values = trimmed.substringAfter("{")
-                                        .substringBefore("}")
-                                        .split(",")
-                                        .map { it.trim().toInt() }
-                                        .toIntArray()
-                                    variables[name] = values
+                                    val sizePart =
+                                        trimmed.substringAfter("new array[").substringBefore("]")
+                                            .trim()
+                                    val size = evaluateRPN(toRPN(sizePart))
+                                    if (size < 0) {
+                                        variables[name] = IntArray(0)
+                                        output.append("Ошибка: размер массива не может быть отрицательным\n")
+                                    } else {
+                                        variables[name] = IntArray(size) { 0 }
+                                        output.append("Объявлен массив $name размером $size, инициализированный нулями\n")
+                                    }
                                 } catch (e: Exception) {
-                                    variables[name] = intArrayOf()
+                                    variables[name] = IntArray(0)
+                                    output.append("Ошибка создания массива $name: ${e.message}\n")
                                 }
                             }
+
+                            trimmed.contains("[") && trimmed.contains("] =") -> {
+                                try {
+                                    val leftPart = trimmed.substringBefore("=").trim()
+                                    val rightPart =
+                                        trimmed.substringAfter("=").substringBefore(";").trim()
+
+                                    val arrName = leftPart.substringBefore("[").trim()
+                                    val indexExpr =
+                                        leftPart.substringAfter("[").substringBefore("]").trim()
+
+                                    val array = variables[arrName] as? IntArray
+                                    if (array == null) {
+                                        output.append("Ошибка: массив $arrName не найден\n")
+                                    } else {
+                                        val index = evaluateRPN(toRPN(indexExpr))
+
+                                        if (index !in array.indices) {
+                                            output.append("Ошибка: индекс $index выходит за границы массива $arrName (размер ${array.size})\n")
+                                        } else {
+                                            val value = evaluateRPN(toRPN(rightPart))
+
+                                            array[index] = value
+                                            output.append("$arrName[$index] = $value\n")
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    output.append("Ошибка при присваивании элемента массива: ${e.message}\n")
+                                }
+                            }
+
+                            trimmed.contains("=") && trimmed.containsAny(
+                                "+",
+                                "-",
+                                "*",
+                                "/",
+                                "%"
+                            ) && trimmed.contains("[") -> {
+                                try {
+                                    val leftVar = trimmed.substringBefore("=").trim()
+                                    val rightExpr =
+                                        trimmed.substringAfter("=").substringBefore(";").trim()
+
+                                    val operator = rightExpr.firstOrNull { it in "+-*/%" }
+                                        ?: throw Exception("Оператор не найден")
+
+                                    val parts = rightExpr.split(operator).map { it.trim() }
+                                    if (parts.size == 2) {
+                                        val leftPart = parts[0]
+                                        val arrayPart = parts[1]
+
+                                        val leftValue = when {
+                                            leftPart.toIntOrNull() != null -> leftPart.toInt()
+                                            variables.containsKey(leftPart) -> variables[leftPart] as? Int
+                                                ?: 0
+
+                                            else -> throw Exception("Неизвестная переменная: $leftPart")
+                                        }
+
+                                        if (arrayPart.contains("[")) {
+                                            val arrName = arrayPart.substringBefore("[").trim()
+                                            val indexExpr =
+                                                arrayPart.substringAfter("[").substringBefore("]")
+                                                    .trim()
+
+                                            val index = evaluateRPN(toRPN(indexExpr))
+                                            val array = variables[arrName] as? IntArray
+
+                                            if (array != null && index in array.indices) {
+                                                val arrayValue = array[index]
+                                                val result = when (operator) {
+                                                    '+' -> leftValue + arrayValue
+                                                    '-' -> leftValue - arrayValue
+                                                    '*' -> leftValue * arrayValue
+                                                    '/' -> if (arrayValue != 0) leftValue / arrayValue else 0
+                                                    '%' -> if (arrayValue != 0) leftValue % arrayValue else 0
+                                                    else -> throw Exception("Неподдерживаемый оператор: $operator")
+                                                }
+
+                                                variables[leftVar] = result
+                                                output.append("$leftVar = $result\n")
+                                            } else {
+                                                output.append("Ошибка: неверный индекс или массив\n")
+                                            }
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    output.append("Ошибка при вычислении выражения: ${e.message}\n")
+                                }
+                            }
+
                             trimmed.startsWith("int") && !trimmed.contains("=") -> {
                                 val names = trimmed.substringAfter("int")
                                     .substringBefore(";")
@@ -386,12 +570,14 @@ fun interpretCode(blocks: List<String>): String {
                                     declaredVariables.add(name)
                                 }
                             }
+
                             trimmed.contains("=") && !trimmed.startsWith("int") -> {
                                 val left = trimmed.substringBefore("=").trim()
                                 val right = trimmed.substringAfter("=").substringBefore(";").trim()
                                 if (left.contains("[")) {
                                     val arrName = left.substringBefore("[").trim()
-                                    val indexExpr = left.substringAfter("[").substringBefore("]").trim()
+                                    val indexExpr =
+                                        left.substringAfter("[").substringBefore("]").trim()
                                     val index = evaluateRPN(toRPN(indexExpr))
                                     val value = evaluateRPN(toRPN(right))
                                     (variables[arrName] as? IntArray)?.set(index, value)
@@ -399,27 +585,6 @@ fun interpretCode(blocks: List<String>): String {
                                     val value = evaluateRPN(toRPN(right))
                                     variables[left] = value
                                     if (left !in declaredVariables) declaredVariables.add(left)
-                                }
-                            }
-                            trimmed.startsWith("int") && trimmed.contains("=") -> {
-                                val declarations = trimmed.substringAfter("int")
-                                    .substringBefore(";")
-                                    .split(",")
-                                    .map { it.trim() }
-                                    .filter { it.isNotEmpty() }
-                                declarations.forEach { declaration ->
-                                    if (declaration.contains("=")) {
-                                        val name = declaration.substringBefore("=").trim()
-                                        val expr = declaration.substringAfter("=").trim()
-                                        try {
-                                            val value = evaluateRPN(toRPN(expr))
-                                            variables[name] = value
-                                            declaredVariables.add(name)
-                                        } catch (e: Exception) {
-                                            variables[name] = 0
-                                            declaredVariables.add(name)
-                                        }
-                                    }
                                 }
                             }
                         }
