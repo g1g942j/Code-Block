@@ -27,6 +27,10 @@ fun MainScreen() {
     val nestingLevels = remember(blocks) { calculateNestingLevels(blocks) }
     val errorIndices = remember(blocks) { validateCodeStructure(blocks) }
 
+    val fixErrorMessage = stringResource(R.string.fix_errors_before_execution)
+    val exitMessage = stringResource(R.string.exit_edit)
+    val editMessage = stringResource(R.string.edit_blocks)
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -46,7 +50,7 @@ fun MainScreen() {
                     ) {
                         Icon(
                             imageVector = if (editMode) Icons.Default.Done else Icons.Default.Edit,
-                            contentDescription = if (editMode) "Exit Edit" else "Edit Blocks"
+                            contentDescription = if (editMode) exitMessage else editMessage
                         )
                     }
 
@@ -56,7 +60,7 @@ fun MainScreen() {
                                 outputText = interpretCode(blocks)
                                 showOutput = true
                             } else {
-                                outputText = "Исправьте ошибки перед выполнением:\n" +
+                                outputText = fixErrorMessage +
                                         errorIndices.joinToString { "#${it + 1}" }
                                 showOutput = true
                             }
@@ -69,7 +73,11 @@ fun MainScreen() {
             )
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+        ) {
             DropArea(
                 blocks = blocks,
                 nestingLevels = nestingLevels,

@@ -5,6 +5,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.code_block.R
 
@@ -14,6 +15,9 @@ fun SideMenu(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val arrayInit = stringResource(R.string.array_init)
+    val declareArray = stringResource(R.string.declare_array)
+    val arrayAssignment = stringResource(R.string.array_assignment)
 
     Column(
         modifier = modifier
@@ -47,19 +51,31 @@ fun SideMenu(
             style = MaterialTheme.typography.labelLarge,
             modifier = Modifier.padding(vertical = 8.dp)
         )
+
         Button(
             onClick = {
-                onBlockAdded(context.getString(R.string.array_text))
+                onBlockAdded(arrayInit)
             },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp)
         ) {
-            Text(context.getString(R.string.array))
+            Text(declareArray)
+        }
+
+        Button(
+            onClick = {
+                onBlockAdded(arrayAssignment)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+        ) {
+            Text(stringResource(R.string.array_assignment_text))
         }
 
         Text(
-            text = "Control Structures",
+            text = context.getString(R.string.control_structures),
             style = MaterialTheme.typography.labelLarge,
             modifier = Modifier.padding(vertical = 8.dp)
         )
@@ -82,7 +98,7 @@ fun SideMenu(
         }
 
         Text(
-            text = "Examples",
+            text = context.getString(R.string.tests),
             style = MaterialTheme.typography.labelLarge,
             modifier = Modifier.padding(vertical = 8.dp)
         )
@@ -90,16 +106,22 @@ fun SideMenu(
         Button(
             onClick = {
                 listOf(
-                    R.string.bubble_sort_array,
-                    R.string.bubble_sort_loop1,
-                    R.string.bubble_sort_loop2,
-                    R.string.bubble_sort_if,
-                    R.string.bubble_sort_temp,
-                    R.string.bubble_sort_swap1,
-                    R.string.bubble_sort_swap2,
-                    R.string.bubble_sort_close,
-                    R.string.bubble_sort_close,
-                    R.string.bubble_sort_close
+                    R.string.bs_array_init,
+                    R.string.bs_array_1,
+                    R.string.bs_array_2,
+                    R.string.bs_array_3,
+                    R.string.bs_array_4,
+                    R.string.bs_array_5,
+                    R.string.bs_temp_var,
+                    R.string.bs_outer_loop,
+                    R.string.bs_inner_loop,
+                    R.string.bs_condition,
+                    R.string.bs_swap1,
+                    R.string.bs_swap2,
+                    R.string.bs_swap3,
+                    R.string.close_block,
+                    R.string.close_block,
+                    R.string.close_block
                 ).forEach { resId ->
                     onBlockAdded(context.getString(resId))
                 }
@@ -109,25 +131,6 @@ fun SideMenu(
                 .padding(vertical = 4.dp)
         ) {
             Text(context.getString(R.string.bubble_sort))
-        }
-
-        Button(
-            onClick = {
-                listOf(
-                    R.string.if_checker_var_declaration,
-                    R.string.if_checker_assignment,
-                    R.string.if_checker_if,
-                    R.string.if_checker_if_body,
-                    R.string.if_checker_close
-                ).forEach { resId ->
-                    onBlockAdded(context.getString(resId))
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp)
-        ) {
-            Text("If Checker")
         }
 
         Button(
@@ -145,7 +148,7 @@ fun SideMenu(
                 .fillMaxWidth()
                 .padding(vertical = 4.dp)
         ) {
-            Text("For Checker")
+            Text(stringResource(R.string.for_checker))
         }
         Button(
             onClick = {
@@ -167,6 +170,27 @@ fun SideMenu(
                 .padding(vertical = 4.dp)
         ) {
             Text(context.getString(R.string.if_else_checker))
+        }
+        Button(
+            onClick = {
+                listOf(
+                    R.string.array_checker_init,
+                    R.string.array_checker_loop1,
+                    R.string.array_checker_assign,
+                    R.string.close_block,
+                    R.string.array_checker_sum_decl,
+                    R.string.array_checker_loop2,
+                    R.string.array_checker_sum,
+                    R.string.close_block
+                ).forEach { resId ->
+                    onBlockAdded(context.getString(resId))
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+        ) {
+            Text(R.string.array_checker.toString())
         }
     }
 }

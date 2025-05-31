@@ -5,11 +5,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
-
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.*
@@ -37,7 +35,7 @@ fun BlockItem(
     modifier: Modifier = Modifier
 ) {
     val isUneditable = text.trim().let { trimmed ->
-        trimmed == stringResource(R.string.close_block) || trimmed.startsWith("else")
+        trimmed == stringResource(R.string.close_block) || trimmed.startsWith(stringResource(R.string.else_block))
     }
 
     var isEditing by remember { mutableStateOf(false) }
@@ -51,12 +49,16 @@ fun BlockItem(
         hasError -> MaterialTheme.colorScheme.errorContainer
         text.trim() == stringResource(R.string.close_block) ->
             MaterialTheme.colorScheme.secondaryContainer
-        text.trim().startsWith("else") ->
+
+        text.trim().startsWith(stringResource(R.string.else_block)) ->
             MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f)
-        text.trim().endsWith("{") ->
+
+        text.trim().endsWith(stringResource(R.string.open_block)) ->
             MaterialTheme.colorScheme.primaryContainer
-        text.trim().endsWith("}") ->
+
+        text.trim().endsWith(stringResource(R.string.close_block)) ->
             MaterialTheme.colorScheme.secondaryContainer
+
         else ->
             MaterialTheme.colorScheme.surface
     }

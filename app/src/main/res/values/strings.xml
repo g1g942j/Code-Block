@@ -14,9 +14,10 @@
     <string name="for_loop_text">for (int i=0; i &lt; 10; i++) {</string>
     <string name="condition">If</string>
     <string name="if_text">if () {</string>
-    <string name="else_block">Else</string>
+    <string name="else_block">else</string>
     <string name="else_text">else {</string>
     <string name="close">Close Block</string>
+    <string name="open_block">{</string>
     <string name="close_block">}</string>
     <string name="variable_declaration">Variable Declaration</string>
     <string name="variable_declaration_text">int x, y, z;</string>
@@ -24,14 +25,19 @@
     <string name="variable_assignment_text">x = 0;</string>
 
     <string name="bubble_sort">Bubble Sort</string>
-    <string name="bubble_sort_array">int[] arr = {5,3,1,4,2};</string>
-    <string name="bubble_sort_loop1">for (int i=0; i &lt; arr.length-1; i++) {</string>
-    <string name="bubble_sort_loop2">for (int j=0; j &lt; arr.length-i-1; j++) {</string>
-    <string name="bubble_sort_if">if (arr[j] > arr[j+1]) {</string>
-    <string name="bubble_sort_temp">int temp = arr[j];</string>
-    <string name="bubble_sort_swap1">arr[j] = arr[j+1];</string>
-    <string name="bubble_sort_swap2">arr[j+1] = temp;</string>
-    <string name="bubble_sort_close">}</string>
+    <string name="bs_array_init">arr = new array[5];</string>
+    <string name="bs_array_1">arr[0] = 5;</string>
+    <string name="bs_array_2">arr[1] = 3;</string>
+    <string name="bs_array_3">arr[2] = 1;</string>
+    <string name="bs_array_4">arr[3] = 4;</string>
+    <string name="bs_array_5">arr[4] = 2</string>
+    <string name="bs_temp_var">int temp = 0;</string>
+    <string name="bs_outer_loop">for (int i = 0; i &lt; arr.length; i++) {</string>
+    <string name="bs_inner_loop">for (int j = 1; j &lt; arr.length-i; j++) {</string>
+    <string name="bs_condition">if (arr[j-1] > arr[j]) {</string>
+    <string name="bs_swap1">temp = arr[j-1];</string>
+    <string name="bs_swap2">arr[j-1] = arr[j];</string>
+    <string name="bs_swap3">arr[j] = temp;</string>
 
     <string name="output_title">Execution Result</string>
     <string name="close_output">Close</string>
@@ -60,4 +66,28 @@
 
     <string name="move_up">Move Up</string>
     <string name="move_down">Move Down</string>
+
+    <string name="exit_edit">Exit Edit</string>
+    <string name="edit_blocks">Edit Blocks</string>
+    <string name="fix_errors_before_execution">Исправьте ошибки перед выполнением:\n</string>
+
+    <string name="errors_found">Обнаружены ошибки</string>
+    <string name="execution_result">Результат выполнения</string>
+    <string name="close_message">Закрыть</string>
+    <string name="errors_header">--- ОШИБКИ ---</string>
+
+    <string name="array_init">int[] arr = new array[0];</string>
+    <string name="array_assignment">arr[index] = 0;</string>
+    <string name="declare_array">Declare Array</string>
+    <string name="array_assignment_text">Array Assignment</string>
+    <string name="control_structures">Control Structures</string>
+    <string name="tests">Tests</string>
+    <string name="array_checker">Array Checker</string>
+
+    <string name="array_checker_init">int[] arr = new array[10];</string>
+    <string name="array_checker_loop1">for (int i = 0; i &lt; arr.length; i++) {</string>
+    <string name="array_checker_assign">arr[i] = i * 2;</string>
+    <string name="array_checker_sum_decl">int sum = 0;</string>
+    <string name="array_checker_loop2">for (int i = 0; i &lt; arr.length; i++) {</string>
+    <string name="array_checker_sum">sum = sum + arr[i];</string>
 </resources>
